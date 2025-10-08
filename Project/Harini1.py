@@ -53,8 +53,7 @@ def get_news(api_key, query, from_date, to_date):
     return df
 
 # --- Example Usage ---
-#API_KEY = "AIzaSyCEzOblVAkW0uf4KHsgMAYvSgbKQehQGPU" # Replace with your actual key
-NEWS_KEY = "5342a45703ea4b178c8e83c7f8927512" 
+
 QUERY = "Apple OR AAPL"
 TO_DATE = datetime.now().strftime('%Y-%m-%d')
 FROM_DATE = (datetime.now() - timedelta(days=29)).strftime('%Y-%m-%d')
