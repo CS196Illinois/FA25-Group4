@@ -3,7 +3,7 @@ import './App.css';
 import logo from './tradewise-logo.png';
 
 
-// This component is JUST the content for the "Main" view
+
 const MainContent = () => {
   return (
     <div className="main-content-layout1">
@@ -31,7 +31,6 @@ const MainContent = () => {
   );
 };
 
-// This component is JUST the content for the "Chat" view
 const ChatContent = () => {
   // State to hold all messages
   const [messages, setMessages] = useState([
@@ -44,7 +43,7 @@ const ChatContent = () => {
 
   // Function to handle sending a message
   const handleSend = () => {
-    if (currentInput.trim() === '') return; // Don't send empty messages
+    if (currentInput.trim() === '') return; // Empty Message check
 
     const newUserMessage = {
       id: Date.now(),
@@ -56,7 +55,7 @@ const ChatContent = () => {
     setMessages(prevMessages => [...prevMessages, newUserMessage]);
     setCurrentInput(''); // Clear the input field
 
-    // Simulate a bot reply after 1 second
+    // Reply message
     setTimeout(() => {
       const botReply = {
         id: Date.now() + 1,
@@ -76,23 +75,18 @@ const ChatContent = () => {
 
   return (
     <div className="main-content-layout2">
-      {/* The chat-interface is now the full content area, no more grid */}
       <div className="chat-interface">
-        
-        {/* This div will hold all the message bubbles */}
         <div className="message-list">
           {messages.map(message => (
             <div
               key={message.id}
-              // Apply 'user' or 'bot' class for styling
               className={`chat-bubble ${message.sender === 'user' ? 'user' : 'bot'}`}
             >
               {message.text}
             </div>
           ))}
         </div>
-        
-        {/* The input area stays at the bottom */}
+
         <div className="chat-input-area">
           <input 
             type="text" 
@@ -104,7 +98,6 @@ const ChatContent = () => {
           <button className="search-icon" onClick={handleSend}>🔍</button>
         </div>
       </div>
-      {/* The recommendation-card is now removed */}
     </div>
   );
 };
