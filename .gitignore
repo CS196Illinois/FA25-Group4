@@ -1,5 +1,6 @@
 .DS_Store
 .env
+.venv
 
 # dependencies
 front-end/node_modules
