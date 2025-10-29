@@ -1,3 +1,24 @@
 .DS_Store
 .env
 .venv
+
+# dependencies
+front-end/node_modules
+front-end/.pnp
+.pnp.js
+
+# testing
+front-end/coverage
+
+# production
+front-end/build
+
+# misc
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
