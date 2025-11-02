@@ -1,42 +1,19 @@
+import logging
 import requests
 import pandas as pd
-from datetime import datetime, timedelta, timezone
-from typing import List, Dict, Any, Optional
+from datetime import timedelta
+from typing import List, Dict, Any
 
 from config import POLYGON_KEY, FINNHUB_KEY, NEWS_KEY, FINANCE_DOMAINS
-# If you already split these helpers into utils.py, import them like:
-# from utils import utc_today, ymd, norm_title
-# Otherwise you can keep these local versions:
+from utils import utc_today, ymd, norm_title, drop_older_than
 
-def utc_today():
-    return datetime.now(timezone.utc).date()
-
-def ymd(d: datetime) -> str:
-    return d.strftime("%Y-%m-%d")
-
-def norm_title(t: str) -> str:
-    """lowercase, collapse whitespace. used for dedupe."""
-    import re
-    t = (t or "").strip().lower()
-    t = re.sub(r"\s+", " ", t)
-    return t
-
-
-def drop_older_than(df: pd.DataFrame, days: int) -> pd.DataFrame:
-    """
-    Enforce age cutoff (mainly to keep Polygon aligned with Finnhub/NewsAPI).
-    We only keep rows where date >= now - days.
-    """
-    if df.empty or "date" not in df.columns:
-        return df
-    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
-    return df[df["date"] >= cutoff].reset_index(drop=True)
+logger = logging.getLogger(__name__)
 
 
 def fetch_polygon(ticker: str, limit: int = 40) -> pd.DataFrame:
     """
     Pull recent ticker-tagged headlines from Polygon.
-    Returns normalized columns:
+    Returns columns:
     [date, source, title, url, description, pid, provider]
     """
     if not POLYGON_KEY or not ticker:
@@ -57,13 +34,11 @@ def fetch_polygon(ticker: str, limit: int = 40) -> pd.DataFrame:
 
     df = pd.DataFrame(items)
 
-    # Normalize
     df["date"] = pd.to_datetime(
         df.get("published_utc"),
         errors="coerce",
         utc=True,
     )
-    # polygon gives `publisher` as an object with "name"
     df["source"] = df.get("publisher").apply(
         lambda s: (s or {}).get("name") if isinstance(s, dict) else s
     )
@@ -85,8 +60,8 @@ def fetch_polygon(ticker: str, limit: int = 40) -> pd.DataFrame:
 
 def fetch_finnhub(ticker: str, days: int = 5, limit: int = 40) -> pd.DataFrame:
     """
-    Pull company news from Finnhub within a date range [today-days, today].
-    Returns normalized columns:
+    Pull company news from Finnhub in window [today-days, today].
+    Returns columns:
     [date, source, title, url, description, pid, provider]
     """
     if not FINNHUB_KEY or not ticker:
@@ -120,7 +95,6 @@ def fetch_finnhub(ticker: str, days: int = 5, limit: int = 40) -> pd.DataFrame:
     df["source"] = df.get("source")
     df["title"] = df.get("headline")
     df["url"] = df.get("url")
-    # Finnhub sometimes includes a short 'summary'
     df["description"] = (
         df.get("summary") if "summary" in df.columns else None
     )
@@ -140,9 +114,8 @@ def fetch_finnhub(ticker: str, days: int = 5, limit: int = 40) -> pd.DataFrame:
 
 def fetch_newsapi(company: str, ticker: str, days: int = 7, limit: int = 40) -> pd.DataFrame:
     """
-    Use NewsAPI 'everything' endpoint to search finance-y coverage in
-    reputable domains for either the company name or ticker.
-    Returns normalized columns:
+    Use NewsAPI 'everything' to search finance-y coverage in known finance domains.
+    Returns columns:
     [date, source, title, url, description, pid, provider]
     """
     if not NEWS_KEY:
@@ -151,7 +124,7 @@ def fetch_newsapi(company: str, ticker: str, days: int = 7, limit: int = 40) -> 
     end = utc_today()
     start = end - timedelta(days=max(1, days))
 
-    # Boolean query tuned toward finance/stock news
+    # boolean query leaning hard toward market/financial coverage
     q = (
         f'("{company}" OR {ticker} OR "{ticker} stock") AND '
         f'(stock OR shares OR earnings OR revenue OR guidance OR CEO OR product OR forecast '
@@ -175,7 +148,7 @@ def fetch_newsapi(company: str, ticker: str, days: int = 7, limit: int = 40) -> 
 
     items: List[Dict[str, Any]] = []
 
-    # Basic pagination loop until we hit limit or NewsAPI hard cap
+    # paginate until we've got enough or hit ~100 articles
     while len(items) < limit:
         next_idx = (params["page"] - 1) * params["pageSize"]
         if next_idx >= 100:
@@ -213,8 +186,7 @@ def fetch_newsapi(company: str, ticker: str, days: int = 7, limit: int = 40) -> 
     df["title"] = df.get("title")
     df["url"] = df.get("url")
     df["description"] = df.get("description")
-    # We'll treat URL as pid since NewsAPI doesn't give an ID
-    df["pid"] = df["url"]
+    df["pid"] = df["url"]  # no id from NewsAPI; URL acts as stable id
     df["provider"] = "newsapi"
 
     df = (
@@ -235,44 +207,61 @@ def fetch_recent_news(
     limit: int = 50
 ) -> pd.DataFrame:
     """
-    High-level function your main script should call.
-    - tries Polygon, Finnhub, NewsAPI
-    - merges
-    - trims by recency
+    High-level orchestrator:
+    - calls Polygon, Finnhub, NewsAPI
+    - enforces recency
     - dedupes
-    - returns newest first
-
-    Output columns:
+    - sorts newest first
+    Returns DataFrame with:
     [date, source, title, url, description, pid, provider, title_norm]
     """
 
     frames = []
+    providers_succeeded = []
+    providers_failed = []
 
     # Polygon
     try:
+        logger.info(f"Fetching from Polygon.io (ticker={ticker})")
         poly_df = fetch_polygon(ticker, limit)
         if not poly_df.empty:
             frames.append(poly_df)
+            providers_succeeded.append(f"Polygon ({len(poly_df)} articles)")
+            logger.info(f"Polygon: Retrieved {len(poly_df)} articles")
+        else:
+            logger.info("Polygon: No articles returned")
     except Exception as e:
-        print(f"[polygon] skipped: {e}")
+        providers_failed.append(f"Polygon: {e}")
+        logger.warning(f"Polygon failed: {e}")
 
     # Finnhub
     try:
+        logger.info(f"Fetching from Finnhub (ticker={ticker}, days={days})")
         fin_df = fetch_finnhub(ticker, days, limit)
         if not fin_df.empty:
             frames.append(fin_df)
+            providers_succeeded.append(f"Finnhub ({len(fin_df)} articles)")
+            logger.info(f"Finnhub: Retrieved {len(fin_df)} articles")
+        else:
+            logger.info("Finnhub: No articles returned")
     except Exception as e:
-        print(f"[finnhub] skipped: {e}")
+        providers_failed.append(f"Finnhub: {e}")
+        logger.warning(f"Finnhub failed: {e}")
 
-    # NewsAPI (doesn't need ticker to strictly exist, uses name too)
+    # NewsAPI
     try:
+        logger.info(f"Fetching from NewsAPI (company={company}, days={days})")
         news_df = fetch_newsapi(company, ticker, days, limit)
         if not news_df.empty:
             frames.append(news_df)
+            providers_succeeded.append(f"NewsAPI ({len(news_df)} articles)")
+            logger.info(f"NewsAPI: Retrieved {len(news_df)} articles")
+        else:
+            logger.info("NewsAPI: No articles returned")
     except Exception as e:
-        print(f"[newsapi] skipped: {e}")
+        providers_failed.append(f"NewsAPI: {e}")
+        logger.warning(f"NewsAPI failed: {e}")
 
-    # No data at all?
     if not frames:
         return pd.DataFrame(
             columns=[
@@ -287,28 +276,30 @@ def fetch_recent_news(
             ]
         )
 
-    # Combine all sources
     out = pd.concat(frames, ignore_index=True)
 
-    # Keep only stories within last `days` days (helps rein in Polygon)
+    # align Polygon freshness with the same `days` window
     out = drop_older_than(out, days)
 
-    # Add normalized title for dedupe
     out["title_norm"] = out["title"].apply(norm_title)
 
-    # Dedupe:
-    # 1. provider's own id
+    # Deduplicate
+    # 1. provider's own ID
     out = out.drop_duplicates(subset=["pid"], keep="first")
-    # 2. same headline from same source
+    # 2. same (normalized title + source)
     out = out.drop_duplicates(subset=["title_norm", "source"], keep="first")
-    # 3. exact URL
+    # 3. same URL
     out = out.drop_duplicates(subset=["url"], keep="first")
 
-    # Sort newest first and cap result count
     out = (
         out.sort_values("date", ascending=False)
         .head(limit)
         .reset_index(drop=True)
+    )
+
+    logger.info(
+        f"Fetch complete: {len(out)} articles after deduplication and filtering. "
+        f"Providers succeeded: {len(providers_succeeded)}, failed: {len(providers_failed)}"
     )
 
     return out

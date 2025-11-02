@@ -1,8 +1,11 @@
 import json
 import re
+import logging
 from typing import List, Dict, Any
 
 from config import GEMINI
+
+logger = logging.getLogger(__name__)
 
 
 def summarize_and_score(
@@ -11,6 +14,18 @@ def summarize_and_score(
     goal: str,
     rows: List[Dict[str, Any]]
 ) -> Dict[str, Any]:
+    """
+    Generate investment summary and sentiment for a company based on news headlines.
+
+    Args:
+        company: Company name
+        ticker: Stock ticker symbol
+        goal: Investment timeframe ("short-term" or "long-term")
+        rows: List of news article dicts with 'title', 'source', 'description'
+
+    Returns:
+        Dict with keys: bullets, long, stance, score, reason
+    """
 
     items = []
     for r in rows[:20]:
@@ -21,6 +36,7 @@ def summarize_and_score(
         })
 
     if not items:
+        logger.warning(f"No headlines provided for summarization of {company}")
         return {
             "bullets": [],
             "long": "No relevant headlines.",
@@ -28,6 +44,8 @@ def summarize_and_score(
             "score": 5,
             "reason": "Insufficient data."
         }
+
+    logger.info(f"Generating summary for {company} based on {len(items)} headlines (goal: {goal})")
 
     prompt = (
         "You are an investment assistant.\n"
@@ -46,39 +64,63 @@ def summarize_and_score(
         "No extra text, no markdown, just JSON."
     )
 
-    resp = GEMINI.generate_content(prompt)
-    txt = (getattr(resp, "text", "") or "").strip()
-
-    m = re.search(r"\{.*\}\s*$", txt, re.S)
-    if not m:
-        raise ValueError("Summarizer did not return strict JSON.")
-
-    data = json.loads(m.group(0))
-
-    bullets = list(data.get("bullets") or [])
-    longp   = (data.get("long") or "").strip()
-    stance  = (data.get("stance") or "Neutral").capitalize()
-
     try:
-        score = int(data.get("score"))
-    except Exception:
-        raise ValueError("Summarizer score missing or not an integer 1-9.")
+        resp = GEMINI.generate_content(prompt)
+        txt = (getattr(resp, "text", "") or "").strip()
 
-    reason  = (data.get("reason") or "").strip()
+        m = re.search(r"\{.*\}\s*$", txt, re.S)
+        if not m:
+            logger.error("Summarizer did not return strict JSON")
+            raise ValueError("Summarizer did not return strict JSON.")
 
-    if stance not in {"Bullish","Neutral","Bearish"}:
-        raise ValueError("Summarizer stance invalid.")
-    if not (1 <= score <= 9):
-        raise ValueError("Summarizer score out of range 1-9.")
-    if not longp:
-        raise ValueError("Summarizer long summary missing.")
-    if len(bullets) == 0:
-        raise ValueError("Summarizer bullets missing.")
+        data = json.loads(m.group(0))
 
-    return {
-        "bullets": bullets[:6],
-        "long": longp,
-        "stance": stance,
-        "score": score,
-        "reason": reason
-    }
+        bullets = list(data.get("bullets") or [])
+        longp = (data.get("long") or "").strip()
+        stance = (data.get("stance") or "Neutral").capitalize()
+
+        try:
+            score = int(data.get("score"))
+        except (ValueError, TypeError) as e:
+            logger.error(f"Invalid score in summary response: {data.get('score')}")
+            raise ValueError("Summarizer score missing or not an integer 1-9.")
+
+        reason = (data.get("reason") or "").strip()
+
+        # Validation
+        if stance not in {"Bullish", "Neutral", "Bearish"}:
+            logger.error(f"Invalid stance: {stance}")
+            raise ValueError(f"Summarizer stance invalid: {stance}")
+
+        if not (1 <= score <= 9):
+            logger.error(f"Score out of range: {score}")
+            raise ValueError(f"Summarizer score out of range 1-9: {score}")
+
+        if not longp:
+            logger.error("Long summary missing from response")
+            raise ValueError("Summarizer long summary missing.")
+
+        if len(bullets) == 0:
+            logger.error("Bullets missing from response")
+            raise ValueError("Summarizer bullets missing.")
+
+        logger.info(
+            f"Summary generated: stance={stance}, score={score}, "
+            f"{len(bullets)} bullets, {len(longp)} char summary"
+        )
+
+        return {
+            "bullets": bullets[:6],
+            "long": longp,
+            "stance": stance,
+            "score": score,
+            "reason": reason
+        }
+
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parsing error in summarizer: {e}")
+        raise ValueError(f"Summarizer returned invalid JSON: {e}")
+
+    except Exception as e:
+        logger.error(f"Error generating summary: {e}", exc_info=True)
+        raise

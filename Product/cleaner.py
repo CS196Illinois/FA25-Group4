@@ -1,8 +1,25 @@
-import json, re
-from typing import List, Dict, Any
+import json
+import re
+import logging
+from typing import Dict
 from config import GEMINI
 
-def clean_company_and_ticker(user_company: str):
+logger = logging.getLogger(__name__)
+
+def clean_company_and_ticker(user_company: str) -> Dict[str, str]:
+    """
+    Resolve user company input to normalized name and ticker symbol.
+
+    Uses Gemini AI to:
+    1. Clean and normalize company name
+    2. Resolve to primary U.S. stock ticker
+
+    Args:
+        user_company: Raw user input (company name, ticker, or nickname)
+
+    Returns:
+        Dict with 'company' and 'ticker' keys (ticker may be empty string)
+    """
     prompt = (
         "You are a finance ticker resolver.\n"
         "Given a user input that might refer to a public company, ETF, fund, commodity future, or brand nickname:\n"
@@ -21,23 +38,33 @@ def clean_company_and_ticker(user_company: str):
         "JSON:"
     )
 
-
     original = user_company.strip()
+
     try:
+        logger.info(f"Resolving company: {original}")
         resp = GEMINI.generate_content(prompt)
         raw = (getattr(resp, "text", "") or "").strip()
-        # attempt to extract the first {...} block
+
+        # Attempt to extract the first {...} block
         m = re.search(r"\{.*\}", raw, re.S)
         if not m:
-            # model didn't send JSON
+            logger.warning(f"Gemini did not return JSON for '{original}'. Using original value.")
             return {"company": original, "ticker": ""}
 
         data = json.loads(m.group(0))
 
         company = (data.get("company") or original).strip()
-        ticker  = (data.get("ticker") or "").strip().upper()
+        ticker = (data.get("ticker") or "").strip().upper()
+        confidence = data.get("confidence", 0)
 
+        logger.info(f"Resolved '{original}' -> company='{company}', ticker='{ticker}', confidence={confidence}")
         return {"company": company, "ticker": ticker}
-    except Exception:
-        # fail closed
+
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parsing error for '{original}': {e}")
+        return {"company": original, "ticker": ""}
+
+    except Exception as e:
+        # Fail-closed: on any error, return original input with no ticker
+        logger.error(f"Error resolving company '{original}': {e}", exc_info=True)
         return {"company": original, "ticker": ""}
