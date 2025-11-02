@@ -1,6 +1,3 @@
-import json, re
-from typing import List, Dict, Any
-from config import GEMINI
 
 def clean_company_and_ticker(user_company: str) -> Dict[str, str]:
     prompt = (
@@ -37,62 +34,3 @@ def gemini_yes_no_company(company: str, ticker: str, title: str, desc: Optional[
         return "YES" in (r.text or "").strip().upper()
     except Exception:
         return False  # strict: do NOT pass through on error
-
-def summarize_and_score_json(company: str, ticker: str, goal: str, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """
-    Strict: requires valid JSON from GenAI. If invalid, raise ValueError.
-    """
-    items = []
-    for r in rows[:20]:
-        items.append({
-            "title": (r.get("title") or "")[:300],
-            "source": r.get("source") or "",
-            "desc": (r.get("description") or "")[:500]
-        })
-    if not items:
-        return {"bullets": [], "long": "No relevant headlines.", "stance":"Neutral", "score":5, "reason":"Insufficient data."}
-
-    prompt = (
-        "You are an investment assistant.\n"
-        f"Company: {company} ({ticker or 'unknown'})\n"
-        f"User goal: {goal}  # short-term=days/weeks; long-term=6+ months\n\n"
-        "Recent items (JSON array of {title,source,desc}):\n"
-        + json.dumps(items, ensure_ascii=False, indent=2)
-        + "\n\nReturn STRICT JSON with keys:\n"
-        '{\n'
-        '  "bullets": ["...", "..."],            # 4-6 concise investor bullets\n'
-        '  "long": "8-12 sentences narrative",   # a single long paragraph is OK\n'
-        '  "stance": "Bullish|Neutral|Bearish",\n'
-        '  "score": 1-9,\n'
-        '  "reason": "one short reason"\n'
-        '}\n'
-        "No extra text, no markdown, just JSON."
-    )
-    r = GEMINI.generate_content(prompt)
-    txt = (r.text or "").strip()
-
-    m = re.search(r"\{.*\}\s*$", txt, re.S)
-    if not m:
-        raise ValueError("GenAI summarizer did not return strict JSON.")
-    data = json.loads(m.group(0))
-
-    # guard rails (type/shape), but not inventing content
-    bullets = list(data.get("bullets") or [])
-    longp   = (data.get("long") or "").strip()
-    stance  = (data.get("stance") or "Neutral").capitalize()
-    try:
-        score = int(data.get("score"))
-    except Exception:
-        raise ValueError("GenAI score missing or not an integer 1-9.")
-    reason  = (data.get("reason") or "").strip()
-
-    if stance not in {"Bullish","Neutral","Bearish"}:
-        raise ValueError("GenAI stance invalid.")
-    if not (1 <= score <= 9):
-        raise ValueError("GenAI score out of range 1-9.")
-    if not longp:
-        raise ValueError("GenAI long summary missing.")
-    if len(bullets) == 0:
-        raise ValueError("GenAI bullets missing.")
-
-    return {"bullets": bullets[:6], "long": longp, "stance": stance, "score": score, "reason": reason}
