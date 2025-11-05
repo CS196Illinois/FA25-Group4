@@ -15,13 +15,14 @@ def summarize_and_score(
     rows: List[Dict[str, Any]]
 ) -> Dict[str, Any]:
     """
-    Generate investment summary and sentiment for a company based on news headlines.
+    Generate investment summary and sentiment for a company based on news articles.
 
     Args:
         company: Company name
         ticker: Stock ticker symbol
         goal: Investment timeframe ("short-term" or "long-term")
         rows: List of news article dicts with 'title', 'source', 'description'
+              Optional: 'full_text' field with complete article content (preferred)
 
     Returns:
         Dict with keys: bullets, long, stance, score, reason
@@ -29,10 +30,19 @@ def summarize_and_score(
 
     items = []
     for r in rows[:20]:
+        # Use full article text if available, otherwise fall back to description
+        full_text = r.get("full_text")
+        if full_text and len(full_text) > 100:
+            # Use first 3000 chars of full article for better context
+            content = full_text[:3000]
+        else:
+            # Fall back to short description
+            content = (r.get("description") or "")[:500]
+
         items.append({
             "title": (r.get("title") or "")[:300],
             "source": r.get("source") or "",
-            "desc": (r.get("description") or "")[:500]
+            "content": content  # Can be full article excerpt or description
         })
 
     if not items:
@@ -51,7 +61,8 @@ def summarize_and_score(
         "You are an investment assistant.\n"
         f"Company: {company} ({ticker or 'unknown'})\n"
         f"User goal: {goal}  # short-term=days/weeks; long-term=6+ months\n\n"
-        "Recent items (JSON array of {title,source,desc}):\n"
+        "Recent items (JSON array of {title,source,content}):\n"
+        "Note: 'content' may include full article text or just a summary.\n"
         + json.dumps(items, ensure_ascii=False, indent=2)
         + "\n\nReturn STRICT JSON with keys:\n"
         '{\n'

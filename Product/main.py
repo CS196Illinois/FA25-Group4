@@ -2,6 +2,7 @@ import logging
 from cleaner import clean_company_and_ticker
 from news_providers import fetch_recent_news
 from llm_client import relevance_filter_batch
+from article_fetcher import fetch_articles_batch
 from summarize import summarize_and_score
 
 # Configure logging
@@ -20,7 +21,7 @@ MAX_HEADLINES_TO_DISPLAY = 12
 
 def run_cli():
     """Main CLI entry point for the investment news aggregation tool."""
-    print("=== Simple Invest News (Strict v3) ===")
+    print("=== Simple Invest News (Full Article Analysis) ===")
 
     # Get user input with validation
     user_company = input("Enter a company: ").strip()
@@ -35,21 +36,94 @@ def run_cli():
     try:
         # Step 1: Resolve entity
         logger.info(f"Resolving company name: {user_company}")
-        print("\n[1/4] Resolving company name and ticker...")
+        print("\n[1/5] Resolving company name and ticker...")
 
         norm = clean_company_and_ticker(user_company)
-        company, ticker = norm["company"], norm["ticker"]
+        company = norm["company"]
+        ticker = norm["ticker"]
+        needs_confirmation = norm.get("needs_confirmation", False)
+        candidates = norm.get("candidates")
+        confidence = norm.get("confidence", 0)
 
         if not company:
             print("Error: Could not resolve company name.")
             logger.error(f"Failed to resolve company: {user_company}")
             return
 
+        # Handle user confirmation if needed
+        if needs_confirmation and candidates:
+            print(f"\nMultiple matches found (AI confidence: {confidence}%). Please select:")
+            for i, cand in enumerate(candidates, 1):
+                validated_mark = "" if cand.get("validated", True) else " [UNVALIDATED]"
+                print(f"  [{i}] {cand['company']} ({cand['ticker']}){validated_mark}")
+            print(f"  [{len(candidates)+1}] Enter ticker manually")
+            print(f"  [0] Cancel")
+
+            while True:
+                try:
+                    choice = input("\nYour choice: ").strip()
+                    choice_num = int(choice)
+
+                    if choice_num == 0:
+                        print("Operation cancelled.")
+                        logger.info("User cancelled after seeing candidates")
+                        return
+                    elif 1 <= choice_num <= len(candidates):
+                        selected = candidates[choice_num - 1]
+                        company = selected["company"]
+                        ticker = selected["ticker"]
+                        logger.info(f"User selected candidate {choice_num}: {company} ({ticker})")
+                        break
+                    elif choice_num == len(candidates) + 1:
+                        # Manual entry
+                        company = input("Enter company name: ").strip()
+                        ticker = input("Enter ticker symbol: ").strip().upper()
+                        if company and ticker:
+                            logger.info(f"User manually entered: {company} ({ticker})")
+                            break
+                        else:
+                            print("Error: Both company name and ticker are required.")
+                    else:
+                        print(f"Please enter a number between 0 and {len(candidates)+1}")
+                except ValueError:
+                    print("Please enter a valid number")
+                except KeyboardInterrupt:
+                    print("\n\nOperation cancelled by user.")
+                    return
+
+        elif needs_confirmation and not candidates:
+            # Low confidence, no candidates found
+            print(f"\nWarning: Could not confidently resolve '{user_company}' (confidence: {confidence}%)")
+            print("Options:")
+            print("  [1] Enter ticker manually")
+            print("  [0] Cancel")
+
+            while True:
+                try:
+                    choice = input("\nYour choice: ").strip()
+                    if choice == "0":
+                        print("Operation cancelled.")
+                        logger.info("User cancelled due to low confidence")
+                        return
+                    elif choice == "1":
+                        company = input("Enter company name: ").strip()
+                        ticker = input("Enter ticker symbol: ").strip().upper()
+                        if company and ticker:
+                            logger.info(f"User manually entered: {company} ({ticker})")
+                            break
+                        else:
+                            print("Error: Both company name and ticker are required.")
+                    else:
+                        print("Please enter 0 or 1")
+                except KeyboardInterrupt:
+                    print("\n\nOperation cancelled by user.")
+                    return
+
         print(f"✓ Normalized: {company}" + (f" ({ticker})" if ticker else " (no ticker)"))
         logger.info(f"Resolved to: {company} ({ticker})")
 
         # Step 2: Fetch news
-        print(f"\n[2/4] Fetching recent news from providers (last {DEFAULT_NEWS_DAYS} days)...")
+        print(f"\n[2/5] Fetching recent news from providers (last {DEFAULT_NEWS_DAYS} days)...")
         logger.info(f"Fetching news for {company} ({ticker})")
 
         df = fetch_recent_news(company, ticker, days=DEFAULT_NEWS_DAYS, limit=DEFAULT_NEWS_LIMIT)
@@ -67,7 +141,7 @@ def run_cli():
         logger.info(f"Fetched {len(df)} headlines")
 
         # Step 3: LLM relevance filter (no literal filter - AI evaluates all headlines)
-        print(f"\n[3/4] Applying AI relevance verification on {len(df)} headlines...")
+        print(f"\n[3/5] Applying AI relevance verification on {len(df)} headlines...")
         print("      (Using batched processing, may take 5-10 seconds)")
         logger.info(f"Starting LLM relevance filter for {len(df)} headlines")
 
@@ -84,12 +158,26 @@ def run_cli():
         print(f"✓ {len(df)} headlines verified as relevant by AI")
         logger.info(f"{len(df)} headlines after LLM filter")
 
+        # Step 3.5: Fetch full article content (NEW)
+        print(f"\n[3.5/5] Fetching full article content for deeper analysis...")
+        print(f"         (This may take 20-30 seconds for {len(df)} articles)")
+        logger.info(f"Fetching full article content for {len(df)} articles")
+
+        rows_with_content = fetch_articles_batch(df.to_dict(orient="records"))
+
+        # Count how many articles successfully fetched
+        articles_fetched = sum(1 for r in rows_with_content if r.get('full_text'))
+        print(f"✓ Fetched full content for {articles_fetched}/{len(df)} articles")
+        logger.info(f"Successfully fetched {articles_fetched} full articles")
+
         # Step 4: Summarize + stance
-        print(f"\n[4/4] Generating investment summary...")
+        print(f"\n[4/5] Generating investment summary with full article analysis...")
         logger.info("Generating summary and sentiment")
 
-        summary = summarize_and_score(company, ticker, goal, df.to_dict(orient="records"))
-        print(f"✓ Summary generated")
+        summary = summarize_and_score(company, ticker, goal, rows_with_content)
+
+        print(f"\n[5/5] Analysis complete!")
+        print(f"✓ Summary generated based on {articles_fetched} full articles")
 
         # Pretty-print results
         print("\n" + "="*60)
