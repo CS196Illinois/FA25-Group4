@@ -1,4 +1,7 @@
+#Harini1_backup.py
+
 from dotenv import load_dotenv
+import pandas as pd
 import os
 
 load_dotenv()
@@ -12,7 +15,6 @@ from datetime import datetime, timedelta
 def get_news(api_key, query, from_date, to_date):
     """Fetches news articles from NewsAPI."""
     url = "https://newsapi.org/v2/everything" # get API for news
-    #NEWS_KEY=5342a45703ea4b178c8e83c7f8927512 
 
     params = {
         'q': query,
