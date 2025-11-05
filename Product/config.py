@@ -13,7 +13,16 @@ if not GEMINI_KEY:
     raise RuntimeError("GEMINI_KEY missing. Add it to .env")
 
 genai.configure(api_key=GEMINI_KEY)
-GEMINI = genai.GenerativeModel("gemini-2.5-flash")
+
+# Use Pro model with low temperature for better accuracy on lesser-known companies
+GEMINI = genai.GenerativeModel(
+    "gemini-2.5-pro",
+    generation_config={
+        "temperature": 0.1,  # More deterministic, less hallucination
+        "top_p": 0.8,
+        "response_mime_type": "application/json"
+    }
+)
 
 FINANCE_DOMAINS = [
     "reuters.com","bloomberg.com","ft.com","wsj.com","cnbc.com",

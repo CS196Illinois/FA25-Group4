@@ -1,3 +1,8 @@
+import sys
+import os
+# Add parent directory to path to import Product modules
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 from cleaner import clean_company_and_ticker
 
 # Each entry: (user_input, expected_company, expected_ticker)
