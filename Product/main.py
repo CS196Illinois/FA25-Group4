@@ -4,6 +4,7 @@ from news_providers import fetch_recent_news
 from llm_client import relevance_filter_batch
 from article_fetcher import fetch_articles_batch
 from summarize import summarize_and_score
+from quotes import extract_quotes_from_articles, print_quotes, get_quote_stats
 
 # Configure logging
 logging.basicConfig(
@@ -170,13 +171,21 @@ def run_cli():
         print(f"✓ Fetched full content for {articles_fetched}/{len(df)} articles")
         logger.info(f"Successfully fetched {articles_fetched} full articles")
 
-        # Step 4: Summarize + stance
-        print(f"\n[4/5] Generating investment summary with full article analysis...")
+        # Step 4: Extract key quotes (second analysis branch)
+        print(f"\n[4/6] Extracting most important investment-relevant quotes...")
+        logger.info("Extracting quotes from articles")
+
+        quotes = extract_quotes_from_articles(rows_with_content, company, num_quotes=15)
+        print(f"✓ Extracted {len(quotes)} key quotes" if quotes else "✓ No quotes extracted")
+        logger.info(f"Extracted {len(quotes)} quotes")
+
+        # Step 5: Summarize + stance (parallel analysis branch)
+        print(f"\n[5/6] Generating investment summary with full article analysis...")
         logger.info("Generating summary and sentiment")
 
         summary = summarize_and_score(company, ticker, goal, rows_with_content)
 
-        print(f"\n[5/5] Analysis complete!")
+        print(f"\n[6/6] Analysis complete!")
         print(f"✓ Summary generated based on {articles_fetched} full articles")
 
         # Pretty-print results
@@ -193,6 +202,24 @@ def run_cli():
         print(f"  (1=very negative, 5=neutral, 9=very positive)")
         if summary["reason"]:
             print(f"  Reason: {summary['reason']}")
+
+        # Display extracted quotes
+        if quotes:
+            print("\n--- Key Investment Quotes ---")
+            # Show top 8 quotes
+            for i, q in enumerate(quotes[:8], 1):
+                weight_blocks = int(q["weight"] * 10)
+                weight_bar = "█" * weight_blocks + "░" * (10 - weight_blocks)
+                print(f"\n  {i}. [{weight_bar}] {q['weight']:.2f}")
+                print(f"     \"{q['quote']}\"")
+                print(f"     — {q['speaker']}")
+                print(f"     Why: {q['context']}")
+
+            # Show quote statistics
+            stats = get_quote_stats(quotes)
+            print(f"\n  Stats: {stats['critical_count']} critical (≥0.9), {stats['high_count']} high priority (≥0.7)")
+            if stats['top_speakers']:
+                print(f"  Most quoted: {', '.join(stats['top_speakers'][:2])}")
 
         print("\n--- Relevant Headlines (newest first) ---")
         show = df[["date", "source", "title", "url"]].copy()
