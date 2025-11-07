@@ -51,3 +51,5 @@ htmlcov/
 # Project-specific
 CLAUDE.md
 .claude
+sentiment
+sentiment test
