@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 import logo from './tradewise-logo.png';
-
-
+import PreferencesPanel from './PreferencesPanel';
 
 const MainContent = () => {
   return (
@@ -16,17 +15,7 @@ const MainContent = () => {
           <p>BLAHBLAHBLAH</p>
         </div>
       </div>
-      <div className="right-panel">
-        <h3>YOUR PREFERENCE</h3>
-        <p>BLAHBLAHBLAH</p>
-        <h4>Settings for preference</h4>
-        <ul>
-          <li>risk tolerance</li>
-          <li>Total Investment</li>
-          <li>High Returns</li>
-          <li>Targeted Return</li>
-        </ul>
-      </div>
+      <PreferencesPanel />
     </div>
   );
 };

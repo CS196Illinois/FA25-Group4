@@ -88,10 +88,6 @@ background-color: #0056b3;
     color: green;
 }
 
-.main-content-layout2 {
-/*Unnecessary style removed*/
-}
-
 .chat-interface {
     border: 1px solid #eee;
     padding: 0; 
@@ -129,42 +125,41 @@ background-color: #0056b3;
 }
 
 .chat-bubble.user {
-background-color: #007bff; /* Primary blue */
-color: white;
-align-self: flex-end; /* Align to the right */
-border-bottom-right-radius: 4px;
+    background-color: #007bff; /* Primary blue */
+    color: white;
+    align-self: flex-end; /* Align to the right */
+    border-bottom-right-radius: 4px;
 }
 
 .chat-suggestions {
-display: none; /* Hide this element */
+    display: none; /* Hide this element */
 }
 
 .chat-input-area {
-display: flex;
-margin-top: auto; /* Pushes it to the bottom */
-padding: 10px;
-border-top: 1px solid #ddd;
-background-color: #fff;
+    display: flex;
+    margin-top: auto; /* Pushes it to the bottom */
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    background-color: #fff;
 }
 
 .chat-input-area input {
-flex-grow: 1;
-border: 1px solid #ccc;
-border-radius: 6px 0 0 6px;
-padding: 10px;
-font-size: 1rem;
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    border-radius: 6px 0 0 6px;
+    padding: 10px;
+    font-size: 1rem;
 }
 
 .chat-input-area button {
-border: 1px solid #ccc;
-border-left: none;
-background-color: #f0f0f0;
-padding: 0 12px;
-border-radius: 0 6px 6px 0;
-cursor: pointer;
+    border: 1px solid #ccc;
+    border-left: none;
+    background-color: #f0f0f0;
+    padding: 0 12px;
+    border-radius: 0 6px 6px 0;
+    cursor: pointer;
 }
 
-/* REMOVED recommendation-card styles */
 .recommendation-card, .card-image, .invest-button {
-display: none;
+    display: none;
 }
