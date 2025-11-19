@@ -79,6 +79,14 @@ Desktop.ini
 *.tmp
 *.temp
 
+# Server PID files
+.backend.pid
+.frontend.pid
+
+# User data (runtime generated)
+data/queries/queries.json
+data/preferences/*_preferences.json
+
 # Claude Code settings and project-specific instructions
 .claude/
 CLAUDE.md
