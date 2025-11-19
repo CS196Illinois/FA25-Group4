@@ -137,10 +137,17 @@ background-color: #0056b3;
 
 .chat-input-area {
     display: flex;
+    flex-direction: column;
     margin-top: auto; /* Pushes it to the bottom */
     padding: 10px;
     border-top: 1px solid #ddd;
     background-color: #fff;
+}
+
+.input-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
 .chat-input-area input {
@@ -149,6 +156,16 @@ background-color: #0056b3;
     border-radius: 6px 0 0 6px;
     padding: 10px;
     font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.chat-input-area input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.chat-input-area input.input-error {
+    border-color: #dc3545;
 }
 
 .chat-input-area button {
@@ -158,6 +175,86 @@ background-color: #0056b3;
     padding: 0 12px;
     border-radius: 0 6px 6px 0;
     cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.chat-input-area button:hover {
+    background-color: #e0e0e0;
+}
+
+/* Detail Toggle Switch */
+.detail-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggle-label span {
+    font-size: 0.85rem;
+    color: #999;
+    transition: color 0.2s;
+}
+
+.toggle-label span.active {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.toggle-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 40px;
+    height: 24px;
+    background-color: #ccc;
+    border-radius: 12px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.toggle-checkbox:checked {
+    background-color: #007bff;
+}
+
+.toggle-checkbox::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s;
+}
+
+.toggle-checkbox:checked::after {
+    left: 18px;
+}
+
+/* Error Message */
+.error-message {
+    color: #dc3545;
+    font-size: 0.85rem;
+    padding: 8px 10px;
+    background-color: #f8d7da;
+    border-left: 3px solid #dc3545;
+    margin-top: 8px;
+    border-radius: 4px;
 }
 
 .recommendation-card, .card-image, .invest-button {
