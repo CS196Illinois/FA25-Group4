@@ -8,11 +8,11 @@ const MainContent = () => {
     <div className="main-content-layout1">
       <div className="left-panel">
         <h3>Trading Insight Today</h3>
-        <p>BLAHBLAHBLAH</p>
+        <p>Get AI-powered investment analysis by entering a company name in the Chat tab. Our system analyzes recent news, extracts key insights, and provides sentiment scoring to help inform your investment decisions.</p>
         <div className="insight-card">
           <span className="arrow-up">↑</span>
           <h4>Stock Picks For You</h4>
-          <p>BLAHBLAHBLAH</p>
+          <p>Personalized recommendations based on your preferences will appear here once you set your risk tolerance, investment amount, and areas of interest below.</p>
         </div>
       </div>
       <PreferencesPanel />

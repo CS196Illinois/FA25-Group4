@@ -98,5 +98,10 @@
     "timestamp": "2025-11-18T23:24:03.408605",
     "company_name": "AMD",
     "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-19T00:17:19.609853",
+    "company_name": "OQEP",
+    "detail_level": "light"
   }
 ]
