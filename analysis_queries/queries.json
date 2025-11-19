@@ -58,5 +58,10 @@
     "timestamp": "2025-11-18T19:06:27.066788",
     "company_name": "rev robotics",
     "detail_level": "detailed"
+  },
+  {
+    "timestamp": "2025-11-18T20:06:08.180964",
+    "company_name": "nvidia",
+    "detail_level": "light"
   }
 ]

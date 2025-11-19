@@ -66,9 +66,9 @@ def analyze_sentiment():
         sentiment_score = scores[text]
         
         # Interpret the score
-        if sentiment_score > 0.3:
+        if sentiment_score > 0.03:
             sentiment_label = 'Positive'
-        elif sentiment_score < -0.3:
+        elif sentiment_score < -0.03:
             sentiment_label = 'Negative'
         else:
             sentiment_label = 'Neutral'
