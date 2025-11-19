@@ -3,7 +3,9 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(python -c:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(xargs kill:*)"
     ],
     "deny": [],
     "ask": []

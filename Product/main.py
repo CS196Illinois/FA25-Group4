@@ -243,12 +243,137 @@ def run_cli():
         logger.info("User cancelled operation")
 
     except Exception as e:
-        print(f"\n❌ An unexpected error occurred: {str(e)}")
+        print(f"\nERROR: An unexpected error occurred: {str(e)}")
         logger.error(f"Unexpected error in CLI: {str(e)}", exc_info=True)
         print("\nPlease check:")
         print("  1. Your .env file has valid API keys (especially GEMINI_KEY)")
         print("  2. You have internet connectivity")
         print("  3. The company name is valid")
+
+def run_analysis(company_name: str, goal: str = "short-term") -> dict:
+    """
+    Programmatic entry point for investment news analysis.
+
+    Args:
+        company_name: Company name to analyze
+        goal: Investment timeframe - "short-term" or "long-term"
+
+    Returns:
+        Dictionary with analysis results:
+        {
+            "success": bool,
+            "company": str,
+            "ticker": str,
+            "bullets": list[str],
+            "long_summary": str,
+            "stance": str,
+            "score": int,
+            "reason": str,
+            "quotes": list[dict],
+            "headlines": list[dict],
+            "error": str (if success=False)
+        }
+    """
+    try:
+        if not company_name or not company_name.strip():
+            return {
+                "success": False,
+                "error": "Company name cannot be empty"
+            }
+
+        # Step 1: Resolve entity
+        logger.info(f"Resolving company name: {company_name}")
+        norm = clean_company_and_ticker(company_name)
+        company = norm["company"]
+        ticker = norm["ticker"]
+
+        if not company:
+            return {
+                "success": False,
+                "error": f"Could not resolve company name: {company_name}"
+            }
+
+        logger.info(f"Resolved to: {company} ({ticker})")
+
+        # Step 2: Fetch news
+        logger.info(f"Fetching news for {company} ({ticker})")
+        df = fetch_recent_news(company, ticker, days=DEFAULT_NEWS_DAYS, limit=DEFAULT_NEWS_LIMIT)
+
+        if df.empty:
+            return {
+                "success": False,
+                "error": "No headlines found from any provider"
+            }
+
+        logger.info(f"Fetched {len(df)} headlines")
+
+        # Step 3: LLM relevance filter
+        logger.info(f"Starting LLM relevance filter for {len(df)} headlines")
+        rows_for_filter = df[["title", "description"]].to_dict(orient="records")
+        keep_flags = relevance_filter_batch(company, ticker, rows_for_filter, batch_size=LLM_BATCH_SIZE)
+        df = df[keep_flags].reset_index(drop=True)
+
+        if df.empty:
+            return {
+                "success": False,
+                "error": "No relevant headlines after AI verification"
+            }
+
+        logger.info(f"{len(df)} headlines after LLM filter")
+
+        # Step 4: Fetch full article content
+        logger.info(f"Fetching full article content for {len(df)} articles")
+        rows_with_content = fetch_articles_batch(df.to_dict(orient="records"))
+        articles_fetched = sum(1 for r in rows_with_content if r.get('full_text'))
+        logger.info(f"Successfully fetched {articles_fetched} full articles")
+
+        # Step 5: Extract key quotes
+        logger.info("Extracting quotes from articles")
+        quotes = extract_quotes_from_articles(rows_with_content, company, num_quotes=15)
+        logger.info(f"Extracted {len(quotes)} quotes")
+
+        # Step 6: Summarize + stance
+        logger.info("Generating summary and sentiment")
+        summary = summarize_and_score(company, ticker, goal, rows_with_content)
+
+        # Format headlines for output
+        headlines = []
+        for _, row in df.head(MAX_HEADLINES_TO_DISPLAY).iterrows():
+            try:
+                date_str = row['date'].strftime("%Y-%m-%d %H:%M UTC")
+            except:
+                date_str = str(row['date'])
+
+            headlines.append({
+                "date": date_str,
+                "source": row['source'],
+                "title": row['title'],
+                "url": row['url']
+            })
+
+        logger.info("Analysis completed successfully")
+
+        return {
+            "success": True,
+            "company": company,
+            "ticker": ticker,
+            "bullets": summary["bullets"],
+            "long_summary": summary["long"],
+            "stance": summary["stance"],
+            "score": summary["score"],
+            "reason": summary.get("reason", ""),
+            "quotes": quotes[:8] if quotes else [],  # Top 8 quotes
+            "headlines": headlines,
+            "articles_analyzed": articles_fetched
+        }
+
+    except Exception as e:
+        logger.error(f"Error in run_analysis: {str(e)}", exc_info=True)
+        return {
+            "success": False,
+            "error": f"An unexpected error occurred: {str(e)}"
+        }
+
 
 if __name__ == "__main__":
     run_cli()

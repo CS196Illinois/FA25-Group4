@@ -1,0 +1,102 @@
+[
+  {
+    "timestamp": "2025-11-18T20:57:54.699486",
+    "company_name": "Google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T20:59:04.778224",
+    "company_name": "Google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T21:03:59.362066",
+    "company_name": "Google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T21:09:43.865789",
+    "company_name": "Google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T21:12:32.456326",
+    "company_name": "Google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T21:48:20.910328",
+    "company_name": "apple",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T21:48:42.550771",
+    "company_name": "google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T21:51:25.611154",
+    "company_name": "Google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T21:52:50.006209",
+    "company_name": "Google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T21:53:21.370023",
+    "company_name": "google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T22:06:05.484363",
+    "company_name": "giga",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T22:07:05.830713",
+    "company_name": "Google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T22:13:08.169709",
+    "company_name": "Google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T22:18:45.925265",
+    "company_name": "google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T22:21:20.565907",
+    "company_name": "Nvidia",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T22:24:35.390389",
+    "company_name": "Google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T22:36:21.009936",
+    "company_name": "Hello",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T22:44:51.518366",
+    "company_name": "Google",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T23:06:21.441582",
+    "company_name": "Nvidiaa",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T23:24:03.408605",
+    "company_name": "AMD",
+    "detail_level": "light"
+  }
+]

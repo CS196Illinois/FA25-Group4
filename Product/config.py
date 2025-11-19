@@ -16,7 +16,7 @@ genai.configure(api_key=GEMINI_KEY)
 
 # Use Pro model with low temperature for better accuracy on lesser-known companies
 GEMINI = genai.GenerativeModel(
-    "gemini-2.5-pro",
+    "gemini-3-pro-preview",
     generation_config={
         "temperature": 0.1,  # More deterministic, less hallucination
         "top_p": 0.8,
