@@ -115,7 +115,7 @@ const ChatContent = () => {
         // Create bot response with sentiment analysis
         const botReply = {
           id: Date.now() + 1,
-          text: `📊 ${data.company_name} Sentiment Analysis:\n\nSentiment: ${data.sentiment_label}\nScore: ${data.sentiment_score.toFixed(4)}`,
+          text: `📊 ${data.company_name} Sentiment Analysis:\n\nSentiment: ${data.sentiment_label}\nScore: ${(data.sentiment_score * 100).toFixed(2)}%`,
           sender: 'bot',
         };
         

@@ -28,5 +28,35 @@
     "timestamp": "2025-11-18T18:52:00.805776",
     "company_name": "11",
     "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T19:03:37.640053",
+    "company_name": "tesla",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T19:03:45.518353",
+    "company_name": "microsoft",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T19:03:56.084318",
+    "company_name": "tesla",
+    "detail_level": "detailed"
+  },
+  {
+    "timestamp": "2025-11-18T19:04:03.818469",
+    "company_name": "facebook",
+    "detail_level": "detailed"
+  },
+  {
+    "timestamp": "2025-11-18T19:06:13.903952",
+    "company_name": "hihi",
+    "detail_level": "detailed"
+  },
+  {
+    "timestamp": "2025-11-18T19:06:27.066788",
+    "company_name": "rev robotics",
+    "detail_level": "detailed"
   }
 ]
