@@ -23,7 +23,7 @@ const MainContent = () => {
 const ChatContent = () => {
   // State to hold all messages
   const [messages, setMessages] = useState([
-    { id: 1, text: 'Welcome! Enter a company name to analyze.', sender: 'bot' },
+    { id: 1, text: 'Welcome! Enter a company name to analyze sentiment.', sender: 'bot' },
   ]);
   // State for company name input
   const [companyName, setCompanyName] = useState('');
@@ -64,10 +64,10 @@ const ChatContent = () => {
     // Save query to backend
     saveAnalysisQuery(companyNameTrimmed, detailLevel);
 
-    // Analyze sentiment
+    // Analyze sentiment with company name
     analyzeSentiment(companyNameTrimmed);
 
-    // Clear input
+    // Clear inputs
     setCompanyName('');
   };
 
@@ -98,9 +98,6 @@ const ChatContent = () => {
   // Analyze sentiment for the company
   const analyzeSentiment = async (company) => {
     try {
-      // Sample text about the company (in a real app, this would come from news data)
-      const sampleText = `${company} announced strong quarterly results with impressive growth metrics.`;
-      
       const response = await fetch('http://localhost:5000/api/sentiment', {
         method: 'POST',
         headers: {
@@ -108,7 +105,7 @@ const ChatContent = () => {
         },
         body: JSON.stringify({
           company_name: company,
-          text: sampleText
+          text: company
         })
       });
 
@@ -118,7 +115,7 @@ const ChatContent = () => {
         // Create bot response with sentiment analysis
         const botReply = {
           id: Date.now() + 1,
-          text: `📊 ${company} Sentiment Analysis:\n\nSentiment: ${data.sentiment_label}\nScore: ${data.sentiment_score.toFixed(4)}\n\nBased on: "${sampleText}"`,
+          text: `📊 ${data.company_name} Sentiment Analysis:\n\nSentiment: ${data.sentiment_label}\nScore: ${data.sentiment_score.toFixed(4)}`,
           sender: 'bot',
         };
         
@@ -127,7 +124,7 @@ const ChatContent = () => {
         // Fallback if sentiment analysis fails
         const botReply = {
           id: Date.now() + 1,
-          text: `Analyzing ${company}. Sentiment analysis service currently unavailable.`,
+          text: `Sentiment analysis service currently unavailable.`,
           sender: 'bot',
         };
         setMessages(prevMessages => [...prevMessages, botReply]);

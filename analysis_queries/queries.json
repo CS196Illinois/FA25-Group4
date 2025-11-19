@@ -13,5 +13,20 @@
     "timestamp": "2025-11-18T18:39:39.719537",
     "company_name": "111",
     "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T18:47:27.583340",
+    "company_name": "hi",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T18:49:46.180698",
+    "company_name": "hi",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T18:52:00.805776",
+    "company_name": "11",
+    "detail_level": "light"
   }
 ]
