@@ -4,7 +4,7 @@ This module provides REST endpoints for saving and retrieving user preferences
 """
 
 from flask import Blueprint, request, jsonify
-from preferences_manager import PreferencesManager
+from managers.preferences_manager import PreferencesManager
 
 # Create a Flask blueprint for preferences routes
 preferences_bp = Blueprint('preferences', __name__, url_prefix='/api')

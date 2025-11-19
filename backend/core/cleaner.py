@@ -4,7 +4,7 @@ import logging
 from typing import Dict, Optional, List
 import yfinance as yf
 import requests
-from config import GEMINI, POLYGON_KEY
+from utils.config import GEMINI, POLYGON_KEY
 
 logger = logging.getLogger(__name__)
 

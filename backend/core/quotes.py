@@ -14,7 +14,7 @@ Pipeline position:
 import re
 import json
 from typing import List, Dict, Any
-from config import GEMINI
+from utils.config import GEMINI
 
 
 def extract_quotes_from_articles(articles: List[Dict[str, Any]], company_name: str, num_quotes: int = 15) -> List[Dict[str, Any]]:

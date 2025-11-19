@@ -11,7 +11,7 @@ from pathlib import Path
 class AnalysisQueryManager:
     """Manages analysis query storage"""
     
-    def __init__(self, queries_dir='./analysis_queries'):
+    def __init__(self, queries_dir='../data/queries'):
         """
         Initialize the query manager
         

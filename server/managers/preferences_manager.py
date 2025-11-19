@@ -12,7 +12,7 @@ from pathlib import Path
 class PreferencesManager:
     """Manages user preferences storage and retrieval"""
     
-    def __init__(self, preferences_dir='./user_preferences'):
+    def __init__(self, preferences_dir='../data/preferences'):
         """
         Initialize the preferences manager
         

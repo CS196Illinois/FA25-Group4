@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List, Optional, Any
 
-from config import GEMINI
+from utils.config import GEMINI
 
 logger = logging.getLogger(__name__)
 

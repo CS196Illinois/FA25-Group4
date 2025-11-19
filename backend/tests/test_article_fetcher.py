@@ -4,10 +4,10 @@ Simple test for article fetching functionality.
 import sys
 import os
 # Add parent directory to path to import Product modules
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 
 import logging
-from article_fetcher import fetch_article_content, fetch_articles_batch
+from core.article_fetcher import fetch_article_content, fetch_articles_batch
 
 # Enable detailed logging
 logging.basicConfig(

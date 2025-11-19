@@ -3,7 +3,7 @@ Flask API for handling analysis queries (company names + detail level)
 """
 
 from flask import Blueprint, request, jsonify
-from analysis_query_manager import AnalysisQueryManager
+from managers.analysis_query_manager import AnalysisQueryManager
 
 # Create a Flask blueprint for analysis routes
 analysis_bp = Blueprint('analysis', __name__, url_prefix='/api')

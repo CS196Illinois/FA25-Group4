@@ -8,12 +8,13 @@ from flask_cors import CORS
 import sys
 import os
 
-# Add Product folder to path so we can import sentiment.py
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'Product'))
+# Add backend folder to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'backend'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 
-from preferences_api import preferences_bp
-from analysis_query_api import analysis_bp
-from sentiment import get_sentiment_scores
+from api.preferences_api import preferences_bp
+from api.analysis_query_api import analysis_bp
+from core.sentiment import get_sentiment_scores
 from main import run_analysis
 
 # Initialize Flask app

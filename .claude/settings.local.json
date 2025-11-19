@@ -5,7 +5,8 @@
       "Bash(python -c:*)",
       "Bash(python:*)",
       "Bash(curl:*)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

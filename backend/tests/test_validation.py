@@ -3,9 +3,9 @@ import sys
 import os
 
 # Add parent directory to path to import Product modules
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from cleaner import clean_company_and_ticker
+
+from core.cleaner import clean_company_and_ticker
 
 print("Testing Enhanced Ticker Validation System")
 print("=" * 60)

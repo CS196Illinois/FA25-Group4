@@ -6,10 +6,10 @@ Run this to see what's actually being fetched from Finnhub API endpoints.
 import sys
 import os
 # Add parent directory to path to import Product modules
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 
 import requests
-from article_fetcher import extract_article_text
+from core.article_fetcher import extract_article_text
 
 # Example URLs from the logs with different char counts
 test_urls = {

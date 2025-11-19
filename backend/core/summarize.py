@@ -3,7 +3,7 @@ import re
 import logging
 from typing import List, Dict, Any
 
-from config import GEMINI
+from utils.config import GEMINI
 
 logger = logging.getLogger(__name__)
 
