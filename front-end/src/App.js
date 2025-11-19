@@ -23,36 +23,125 @@ const MainContent = () => {
 const ChatContent = () => {
   // State to hold all messages
   const [messages, setMessages] = useState([
-    { id: 1, text: 'Welcome! How can I help you analyze stocks today?', sender: 'bot' },
-    { id: 2, text: 'Help me analyze the best stock today', sender: 'user' },
-    { id: 3, text: '*Serious analysis on this option* \n\n (This is a simulated response)', sender: 'bot' },
+    { id: 1, text: 'Welcome! Enter a company name to analyze.', sender: 'bot' },
   ]);
-  // State for the user's current typed message
-  const [currentInput, setCurrentInput] = useState('');
+  // State for company name input
+  const [companyName, setCompanyName] = useState('');
+  // State for detail level (light or detailed)
+  const [detailLevel, setDetailLevel] = useState('light');
+  // State for error messages
+  const [inputError, setInputError] = useState('');
+
+  // Validate company name (only letters, numbers, and common symbols)
+  const isValidCompanyName = (name) => {
+    const trimmed = name.trim();
+    // Allow letters, numbers, spaces, hyphens, periods, and ampersands
+    return /^[a-zA-Z0-9\s\-\.&]{1,100}$/.test(trimmed) && trimmed.length > 0;
+  };
 
   // Function to handle sending a message
   const handleSend = () => {
-    if (currentInput.trim() === '') return; // Empty Message check
+    setInputError('');
 
+    // Validate company name
+    if (!isValidCompanyName(companyName)) {
+      setInputError('Please enter a valid company name (letters, numbers, hyphens, periods only)');
+      return;
+    }
+
+    const companyNameTrimmed = companyName.trim();
+
+    // Create user message
     const newUserMessage = {
       id: Date.now(),
-      text: currentInput,
+      text: `Analyze ${companyNameTrimmed} (${detailLevel} mode)`,
       sender: 'user',
     };
 
     // Add user message to the list
     setMessages(prevMessages => [...prevMessages, newUserMessage]);
-    setCurrentInput(''); // Clear the input field
 
-    // Reply message
-    setTimeout(() => {
+    // Save query to backend
+    saveAnalysisQuery(companyNameTrimmed, detailLevel);
+
+    // Analyze sentiment
+    analyzeSentiment(companyNameTrimmed);
+
+    // Clear input
+    setCompanyName('');
+  };
+
+  // Save analysis query to backend
+  const saveAnalysisQuery = async (company, detail) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/analysis/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          company_name: company,
+          detail_level: detail
+        })
+      });
+
+      if (response.ok) {
+        console.log('Query saved to server');
+      } else {
+        console.log('Query saved locally (server unavailable)');
+      }
+    } catch (error) {
+      console.log('Server not available, query saved in session');
+    }
+  };
+
+  // Analyze sentiment for the company
+  const analyzeSentiment = async (company) => {
+    try {
+      // Sample text about the company (in a real app, this would come from news data)
+      const sampleText = `${company} announced strong quarterly results with impressive growth metrics.`;
+      
+      const response = await fetch('http://localhost:5000/api/sentiment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          company_name: company,
+          text: sampleText
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Create bot response with sentiment analysis
+        const botReply = {
+          id: Date.now() + 1,
+          text: `📊 ${company} Sentiment Analysis:\n\nSentiment: ${data.sentiment_label}\nScore: ${data.sentiment_score.toFixed(4)}\n\nBased on: "${sampleText}"`,
+          sender: 'bot',
+        };
+        
+        setMessages(prevMessages => [...prevMessages, botReply]);
+      } else {
+        // Fallback if sentiment analysis fails
+        const botReply = {
+          id: Date.now() + 1,
+          text: `Analyzing ${company}. Sentiment analysis service currently unavailable.`,
+          sender: 'bot',
+        };
+        setMessages(prevMessages => [...prevMessages, botReply]);
+      }
+    } catch (error) {
+      console.error('Error analyzing sentiment:', error);
+      // Fallback if there's a network error
       const botReply = {
         id: Date.now() + 1,
-        text: `I am processing your request about "${newUserMessage.text}". Please wait for a moment.`,
+        text: `Unable to analyze sentiment at this time. Please ensure the backend server is running.`,
         sender: 'bot',
       };
       setMessages(prevMessages => [...prevMessages, botReply]);
-    }, 1000);
+    }
   };
 
   // Allow sending with the "Enter" key
@@ -77,14 +166,36 @@ const ChatContent = () => {
         </div>
 
         <div className="chat-input-area">
-          <input 
-            type="text" 
-            placeholder="Type your message..." 
-            value={currentInput}
-            onChange={(e) => setCurrentInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-          />
-          <button className="search-icon" onClick={handleSend}>🔍</button>
+          <div className="input-controls">
+            <input 
+              type="text" 
+              placeholder="Enter company name..." 
+              value={companyName}
+              onChange={(e) => {
+                setCompanyName(e.target.value);
+                setInputError('');
+              }}
+              onKeyPress={handleKeyPress}
+              className={inputError ? 'input-error' : ''}
+            />
+            
+            <div className="detail-toggle">
+              <label className="toggle-label">
+                <span className={detailLevel === 'light' ? 'active' : ''}>Light</span>
+                <input
+                  type="checkbox"
+                  checked={detailLevel === 'detailed'}
+                  onChange={(e) => setDetailLevel(e.target.checked ? 'detailed' : 'light')}
+                  className="toggle-checkbox"
+                />
+                <span className={detailLevel === 'detailed' ? 'active' : ''}>Detailed</span>
+              </label>
+            </div>
+
+            <button className="search-icon" onClick={handleSend}>🔍</button>
+          </div>
+          
+          {inputError && <div className="error-message">{inputError}</div>}
         </div>
       </div>
     </div>

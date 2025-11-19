@@ -1,0 +1,17 @@
+[
+  {
+    "timestamp": "2025-11-18T18:26:19.877361",
+    "company_name": "test1",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T18:27:57.572075",
+    "company_name": "test",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T18:39:39.719537",
+    "company_name": "111",
+    "detail_level": "light"
+  }
+]
