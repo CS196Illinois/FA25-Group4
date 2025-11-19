@@ -1,0 +1,67 @@
+[
+  {
+    "timestamp": "2025-11-18T18:26:19.877361",
+    "company_name": "test1",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T18:27:57.572075",
+    "company_name": "test",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T18:39:39.719537",
+    "company_name": "111",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T18:47:27.583340",
+    "company_name": "hi",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T18:49:46.180698",
+    "company_name": "hi",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T18:52:00.805776",
+    "company_name": "11",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T19:03:37.640053",
+    "company_name": "tesla",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T19:03:45.518353",
+    "company_name": "microsoft",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-11-18T19:03:56.084318",
+    "company_name": "tesla",
+    "detail_level": "detailed"
+  },
+  {
+    "timestamp": "2025-11-18T19:04:03.818469",
+    "company_name": "facebook",
+    "detail_level": "detailed"
+  },
+  {
+    "timestamp": "2025-11-18T19:06:13.903952",
+    "company_name": "hihi",
+    "detail_level": "detailed"
+  },
+  {
+    "timestamp": "2025-11-18T19:06:27.066788",
+    "company_name": "rev robotics",
+    "detail_level": "detailed"
+  },
+  {
+    "timestamp": "2025-11-18T20:06:08.180964",
+    "company_name": "nvidia",
+    "detail_level": "light"
+  }
+]
