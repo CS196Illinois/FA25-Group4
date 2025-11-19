@@ -78,3 +78,7 @@ Desktop.ini
 # Temporary files
 *.tmp
 *.temp
+
+# Claude Code settings and project-specific instructions
+.claude/
+CLAUDE.md
