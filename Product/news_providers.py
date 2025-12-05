@@ -4,8 +4,8 @@ import pandas as pd
 from datetime import timedelta
 from typing import List, Dict, Any
 
-from config import POLYGON_KEY, FINNHUB_KEY, NEWS_KEY, FINANCE_DOMAINS
-from utils import utc_today, ymd, norm_title, drop_older_than
+from .config import POLYGON_KEY, FINNHUB_KEY, NEWS_KEY, FINANCE_DOMAINS
+from .utils import utc_today, ymd, norm_title, drop_older_than
 
 logger = logging.getLogger(__name__)
 

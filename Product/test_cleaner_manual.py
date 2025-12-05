@@ -1,4 +1,4 @@
-from cleaner import clean_company_and_ticker
+from  Product.cleaner import clean_company_and_ticker
 
 # Each entry: (user_input, expected_company, expected_ticker)
 TEST_CASES = [

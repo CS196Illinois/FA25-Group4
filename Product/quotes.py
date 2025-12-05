@@ -14,7 +14,7 @@ Pipeline position:
 import re
 import json
 from typing import List, Dict, Any
-from config import GEMINI
+from Product.config import GEMINI
 
 
 def extract_quotes_from_articles(articles: List[Dict[str, Any]], company_name: str, num_quotes: int = 15) -> List[Dict[str, Any]]:
@@ -72,6 +72,26 @@ def extract_quotes_from_articles(articles: List[Dict[str, Any]], company_name: s
 
     return quotes
 
+# Add fallback here
+def fallback_extract_quotes(articles, company_name):
+    quotes = []
+    for art in articles:
+        text = art.get("full_text", "")
+        for match in re.findall(r'"(.*?)"', text):
+            if company_name.lower() in match.lower():
+                quotes.append({
+                    "quote": match,
+                    "speaker": "Unknown",
+                    "weight": 0.5,
+                    "context": "Mention of company in article",
+                    "source_article": {
+                        "title": art.get("title", ""),
+                        "source": art.get("source", ""),
+                        "url": art.get("url", ""),
+                        "date": art.get("date")
+                    }
+                })
+    return quotes
 
 def _prepare_articles_for_analysis(articles: List[Dict[str, Any]]) -> List[Dict[str, str]]:
     """
@@ -283,9 +303,11 @@ def print_quotes(quotes: List[Dict[str, Any]]) -> None:
     Args:
         quotes: Quote list from extract_quotes_from_articles()
     """
-    if not quotes:
-        print("No quotes extracted.")
-        return
+    def print_quotes(quotes: List[Dict[str, Any]]) -> None:
+        if not quotes:
+            print("No quotes extracted.")
+            return
+
 
     print(f"\n{'='*80}")
     print(f"EXTRACTED {len(quotes)} TOP QUOTES")
