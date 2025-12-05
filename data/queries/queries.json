@@ -63,5 +63,25 @@
     "timestamp": "2025-11-18T20:06:08.180964",
     "company_name": "nvidia",
     "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-12-04T18:42:08.902649",
+    "company_name": "tesla",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-12-04T18:43:50.685727",
+    "company_name": "tesla",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-12-04T18:44:43.607121",
+    "company_name": "tesla",
+    "detail_level": "light"
+  },
+  {
+    "timestamp": "2025-12-04T18:45:24.643859",
+    "company_name": "tesla",
+    "detail_level": "light"
   }
 ]
