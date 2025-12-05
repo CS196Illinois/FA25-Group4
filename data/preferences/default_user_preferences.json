@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-11-11T21:45:10.709306",
+  "user_id": "default_user",
+  "riskTolerance": "high",
+  "totalInvestment": "110000",
+  "targetedReturns": "20",
+  "areasInterested": [
+    "Finance",
+    "Real Estate"
+  ]
+}
