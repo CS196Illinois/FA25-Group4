@@ -14,7 +14,7 @@ Pipeline position:
 import re
 import json
 from typing import List, Dict, Any
-from utils.config import GEMINI
+from utils.config import GEMINI, gemini_generate_with_fallback
 
 
 def extract_quotes_from_articles(articles: List[Dict[str, Any]], company_name: str, num_quotes: int = 15) -> List[Dict[str, Any]]:
@@ -171,8 +171,8 @@ Extract exactly {num_quotes} quotes (or fewer if not enough quality quotes exist
 """
 
     try:
-        # Call Gemini LLM
-        response = GEMINI.generate_content(prompt)
+        # Call Gemini LLM with fallback
+        response = gemini_generate_with_fallback(prompt)
         response_text = response.text.strip()
 
         # Extract JSON (consistent with project pattern)

@@ -84,8 +84,12 @@ Desktop.ini
 .frontend.pid
 
 # User data (runtime generated)
-data/queries/queries.json
+data/queries/
 data/preferences/*_preferences.json
+
+# Query-related files (runtime/user-specific)
+server/api/analysis_query_api.py
+server/managers/analysis_query_manager.py
 
 # Claude Code settings and project-specific instructions
 .claude/

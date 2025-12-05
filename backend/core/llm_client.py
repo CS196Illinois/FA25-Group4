@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List, Optional, Any
 
-from utils.config import GEMINI
+from utils.config import GEMINI, gemini_generate_with_fallback
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ def gemini_yes_no_company(company: str, ticker: str, title: str, desc: Optional[
     )
 
     try:
-        resp = GEMINI.generate_content(prompt)
+        resp = gemini_generate_with_fallback(prompt)
         result = "YES" in (resp.text or "").strip().upper()
 
         if result:
@@ -100,7 +100,7 @@ def relevance_filter_batch(
         prompt = "".join(prompt_parts)
 
         try:
-            resp = GEMINI.generate_content(prompt)
+            resp = gemini_generate_with_fallback(prompt)
             text = (resp.text or "").strip()
 
             # Try to extract JSON array

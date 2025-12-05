@@ -3,7 +3,7 @@ import re
 import logging
 from typing import List, Dict, Any
 
-from utils.config import GEMINI
+from utils.config import GEMINI, gemini_generate_with_fallback
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ def summarize_and_score(
     )
 
     try:
-        resp = GEMINI.generate_content(prompt)
+        resp = gemini_generate_with_fallback(prompt)
         txt = (getattr(resp, "text", "") or "").strip()
 
         m = re.search(r"\{.*\}\s*$", txt, re.S)

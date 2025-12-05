@@ -119,6 +119,7 @@ See [.env.example](.env.example) for details on getting API keys.
 - Verify GEMINI_KEY is valid
 - Check backend terminal for error messages
 - Ensure internet connection is active
+- **Note:** The app uses `gemini-3-pro-preview` by default with automatic fallback to `gemini-2.5-pro` if the primary model fails or hits rate limits
 
 **CORS errors:**
 - Make sure backend is running on port 5001

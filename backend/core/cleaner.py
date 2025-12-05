@@ -4,7 +4,7 @@ import logging
 from typing import Dict, Optional, List
 import yfinance as yf
 import requests
-from utils.config import GEMINI, POLYGON_KEY
+from utils.config import GEMINI, POLYGON_KEY, gemini_generate_with_fallback
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +142,7 @@ def clean_company_and_ticker(user_company: str) -> Dict:
 
     try:
         logger.info(f"Resolving company: {original}")
-        resp = GEMINI.generate_content(prompt)
+        resp = gemini_generate_with_fallback(prompt)
         raw = (getattr(resp, "text", "") or "").strip()
 
         # Attempt to extract the first {...} block
