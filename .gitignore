@@ -90,3 +90,5 @@ data/preferences/*_preferences.json
 # Claude Code settings and project-specific instructions
 .claude/
 CLAUDE.md
+Project/
+Project/
